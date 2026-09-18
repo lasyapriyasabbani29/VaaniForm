@@ -10,6 +10,7 @@ import { SuccessScreen } from './components/SuccessScreen';
 
 export default function App() {
   const {
+    appMode,
     screenMode,
     statusMessage,
     errorMessage,
@@ -30,7 +31,7 @@ export default function App() {
     engineInfo,
     submissionResult,
     activeLanguage,
-    isDemoMode,
+    setAppMode,
     setActiveLanguage,
     handleFileUpload,
     handleUseSampleForm,
@@ -51,24 +52,19 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
-      {/* Top Navigation Header */}
+      {/* Top Navigation Header with Operational Mode Selector */}
       <Header
         activeLanguage={activeLanguage}
         onLanguageChange={setActiveLanguage}
+        appMode={appMode}
+        onModeChange={setAppMode}
       />
 
       {/* Main Container */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6 md:py-8">
         
-        {/* Privacy & Health System Status Badge */}
-        <PrivacyBadge health={systemHealth} />
-
-        {/* Demo Mode Notification Banner */}
-        {isDemoMode && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 mb-6 text-center text-xs font-bold text-amber-300">
-            ⚡ DEMO MODE — Voice transcription simulated using sample data. Ollama extraction & validation active.
-          </div>
-        )}
+        {/* System Status & Operational Mode Explanation Badge */}
+        <PrivacyBadge health={systemHealth} appMode={appMode} />
 
         {/* SCREEN 1: Upload Form */}
         {screenMode === SCREEN_MODES.UPLOAD && (
@@ -142,7 +138,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="py-4 text-center border-t border-slate-800 text-xs text-slate-500">
-        VaaniForm • Dynamic Document Upload & Interactive Voice Assistant • Privacy Preserved Locally
+        VaaniForm • Dynamic Form Upload & Interactive Voice Assistant • Privacy Preserved Locally
       </footer>
     </div>
   );

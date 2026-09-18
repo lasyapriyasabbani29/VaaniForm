@@ -18,6 +18,7 @@ export const SCREEN_MODES = {
 };
 
 export function useVoiceForm() {
+  const [appMode, setAppMode] = useState('LOCAL_OFFLINE'); // 'LOCAL_OFFLINE' | 'PUBLIC_DEMO'
   const [screenMode, setScreenMode] = useState(SCREEN_MODES.UPLOAD);
   const [statusMessage, setStatusMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState(null);
@@ -49,12 +50,10 @@ export function useVoiceForm() {
 
   const [submissionResult, setSubmissionResult] = useState(null);
   const [activeLanguage, setActiveLanguage] = useState('en');
-  const [isDemoMode, setIsDemoMode] = useState(false);
 
   const recorderRef = useRef(null);
   const timerRef = useRef(null);
 
-  // Initial Health Load
   useEffect(() => {
     reloadHealth();
   }, []);
@@ -62,13 +61,19 @@ export function useVoiceForm() {
   const reloadHealth = async () => {
     const health = await checkHealth();
     setSystemHealth(health);
+    // If backend unreachable on initial load, auto select Public Demo Mode for public web visitors
+    if (!health.backend) {
+      setAppMode('PUBLIC_DEMO');
+    }
   };
+
+  const isPublicDemo = appMode === 'PUBLIC_DEMO';
 
   // 1. Text-to-Speech (TTS) Question Reading
   const speakQuestion = (text) => {
     if (!('speechSynthesis' in window)) return;
     try {
-      window.speechSynthesis.cancel(); // Stop prior speech
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.95;
       utterance.pitch = 1.0;
@@ -82,10 +87,10 @@ export function useVoiceForm() {
   const handleFileUpload = async (file) => {
     setErrorMessage(null);
     setIsLoading(true);
-    setStatusMessage('Analyzing uploaded document locally via Ollama...');
+    setStatusMessage(isPublicDemo ? 'Analyzing form document in web demo...' : 'Analyzing uploaded document locally via Ollama...');
 
     try {
-      const res = await uploadAndAnalyzeForm(file);
+      const res = await uploadAndAnalyzeForm(file, isPublicDemo);
       initializeAnalyzedForm(res);
       setScreenMode(SCREEN_MODES.DETECTED);
     } catch (err) {
@@ -101,7 +106,7 @@ export function useVoiceForm() {
     setStatusMessage('Generating sample Citizen Service form...');
 
     try {
-      const res = await analyzeSampleForm();
+      const res = await analyzeSampleForm(isPublicDemo);
       initializeAnalyzedForm(res);
       setScreenMode(SCREEN_MODES.DETECTED);
     } catch (err) {
@@ -114,14 +119,13 @@ export function useVoiceForm() {
   const handleRunDemoMode = async () => {
     setErrorMessage(null);
     setIsLoading(true);
-    setIsDemoMode(true);
-    setStatusMessage('Setting up Simulated Demo Mode...');
+    setAppMode('PUBLIC_DEMO');
+    setStatusMessage('Setting up Public Demo Mode...');
 
     try {
-      const res = await analyzeSampleForm();
+      const res = await analyzeSampleForm(true);
       initializeAnalyzedForm(res);
       
-      // Populate sample demo values
       const demoVals = {
         first_name: 'Ananya',
         last_name: 'Sharma',
@@ -135,7 +139,7 @@ export function useVoiceForm() {
 
       setFormValues(demoVals);
       setConfidenceScores(demoConf);
-      setEngineInfo({ transcription: 'simulated_demo_transcript', extraction: 'ollama_gemma3:4b' });
+      setEngineInfo({ transcription: 'web_demo_simulated_stt', extraction: 'demo_web_normalizer' });
       setScreenMode(SCREEN_MODES.REVIEW);
     } catch (err) {
       setErrorMessage(`Demo setup error: ${err.message}`);
@@ -167,7 +171,7 @@ export function useVoiceForm() {
     setCurrentExtractedValue(null);
   };
 
-  // 3. Interactive Voice Filling Mode Controls
+  // 3. Voice Filling Assistant Controls
   const startVoiceFilling = () => {
     setCurrentFieldIndex(0);
     setScreenMode(SCREEN_MODES.VOICE_FILLING);
@@ -196,26 +200,24 @@ export function useVoiceForm() {
 
     setIsRecording(false);
     setIsProcessing(true);
-    setStatusMessage('Transcribing speech via local Whisper.cpp...');
+    setStatusMessage(isPublicDemo ? 'Processing speech answer in Public Demo...' : 'Transcribing speech via local Whisper.cpp...');
 
     const currentField = fieldsList[currentFieldIndex];
 
     try {
       const audioBlob = await recorderRef.current.stop();
       
-      // Step 1: Transcribe via Whisper.cpp
-      const sttRes = await transcribeAudio(audioBlob);
+      const sttRes = await transcribeAudio(audioBlob, isPublicDemo);
       const tsText = sttRes.transcript || '';
       setCurrentTranscript(tsText);
 
-      // Step 2: Extract & normalize single field answer via Ollama
-      setStatusMessage('Extracting & normalizing answer via local Ollama LLM...');
+      setStatusMessage(isPublicDemo ? 'Normalizing answer...' : 'Extracting & normalizing answer via local Ollama LLM...');
       const answerRes = await extractSingleFieldAnswer({
         question: currentField.question || `Please tell me your ${currentField.label}.`,
         fieldLabel: currentField.label,
         fieldType: currentField.type || 'text',
         transcript: tsText
-      });
+      }, isPublicDemo);
 
       const extractedVal = answerRes.extracted_value || tsText;
       setCurrentExtractedValue(extractedVal);
@@ -283,13 +285,14 @@ export function useVoiceForm() {
   const submitFinalForm = async () => {
     setErrorMessage(null);
     setIsLoading(true);
-    setStatusMessage('Completing form submission locally...');
+    setStatusMessage('Completing form submission...');
 
     try {
       const res = await completeForm(
         formSchema.form_id,
         formSchema.form_name,
-        formValues
+        formValues,
+        isPublicDemo
       );
       setSubmissionResult(res);
       setScreenMode(SCREEN_MODES.SUCCESS);
@@ -311,10 +314,10 @@ export function useVoiceForm() {
     setCurrentExtractedValue(null);
     setSubmissionResult(null);
     setErrorMessage(null);
-    setIsDemoMode(false);
   };
 
   return {
+    appMode,
     screenMode,
     statusMessage,
     errorMessage,
@@ -335,7 +338,7 @@ export function useVoiceForm() {
     engineInfo,
     submissionResult,
     activeLanguage,
-    isDemoMode,
+    setAppMode,
     setActiveLanguage,
     handleFileUpload,
     handleUseSampleForm,
