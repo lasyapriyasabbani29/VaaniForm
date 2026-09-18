@@ -1,0 +1,101 @@
+{
+  "form_id": "citizen_service_form",
+  "form_name": "Citizen Service Application",
+  "description": "Standard application form for government citizen services, certificates, and welfare programs.",
+  "category": "Government Services",
+  "fields": [
+    {
+      "id": "full_name",
+      "label": "Full Name",
+      "type": "text",
+      "required": true,
+      "description": "Full legal name as per Aadhaar or official ID",
+      "placeholder": "e.g. Ananya Sharma",
+      "validation_rules": {
+        "min_length": 2,
+        "max_length": 100
+      }
+    },
+    {
+      "id": "date_of_birth",
+      "label": "Date of Birth",
+      "type": "date",
+      "required": true,
+      "description": "Date of birth (Format: YYYY-MM-DD or DD/MM/YYYY)",
+      "placeholder": "e.g. 2004-03-12",
+      "validation_rules": {
+        "format": "YYYY-MM-DD"
+      }
+    },
+    {
+      "id": "mobile_number",
+      "label": "Mobile Number",
+      "type": "phone",
+      "required": true,
+      "description": "10-digit Indian mobile number",
+      "placeholder": "e.g. 9876543210",
+      "validation_rules": {
+        "pattern": "^(?:\\+91|91)?[6-9]\\d{9}$",
+        "length": 10
+      }
+    },
+    {
+      "id": "address",
+      "label": "Address",
+      "type": "textarea",
+      "required": true,
+      "description": "Complete residential address including village/locality",
+      "placeholder": "e.g. H.No 12-3, Jubilee Hills, Hyderabad",
+      "validation_rules": {
+        "min_length": 5
+      }
+    },
+    {
+      "id": "father_mother_name",
+      "label": "Father's / Mother's Name",
+      "type": "text",
+      "required": false,
+      "description": "Name of father, mother, or guardian",
+      "placeholder": "e.g. Ramesh Sharma",
+      "validation_rules": {}
+    },
+    {
+      "id": "occupation",
+      "label": "Occupation",
+      "type": "text",
+      "required": false,
+      "description": "Current profession or work",
+      "placeholder": "e.g. Student / Farmer / Business",
+      "validation_rules": {}
+    },
+    {
+      "id": "annual_income",
+      "label": "Annual Income (INR)",
+      "type": "number",
+      "required": false,
+      "description": "Annual household income in Indian Rupees",
+      "placeholder": "e.g. 150000",
+      "validation_rules": {
+        "min_value": 0
+      }
+    },
+    {
+      "id": "district",
+      "label": "District",
+      "type": "text",
+      "required": true,
+      "description": "District name",
+      "placeholder": "e.g. Hyderabad",
+      "validation_rules": {}
+    },
+    {
+      "id": "state",
+      "label": "State",
+      "type": "text",
+      "required": true,
+      "description": "State / Union Territory",
+      "placeholder": "e.g. Telangana",
+      "validation_rules": {}
+    }
+  ]
+}

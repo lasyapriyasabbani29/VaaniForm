@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / React
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+.npm
+*.log
+
+# Environment & Temp
+.env
+.env.local
+*.tmp
+*.wav
+*.mp3
+*.m4a
+temp_audio/
+
+# IDE & System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# AI Models
+*.bin
+*.gguf
+models/*.bin
+models/*.gguf
+
+# Uploaded / generated user data
+uploads/
+recordings/
+completed_forms/

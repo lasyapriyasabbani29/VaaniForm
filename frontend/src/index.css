@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-slate-900 text-slate-100 font-sans antialiased min-h-screen selection:bg-indigo-500 selection:text-white;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 20px rgba(99, 102, 241, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.highlight-field {
+  animation: highlightFade 1.8s ease-out;
+}
+
+@keyframes highlightFade {
+  0% {
+    background-color: rgba(99, 102, 241, 0.25);
+    border-color: #6366f1;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
